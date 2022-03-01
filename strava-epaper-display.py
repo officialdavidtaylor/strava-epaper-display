@@ -45,7 +45,7 @@ def GetRecentStravaData():
         return strava_data
     except:
         print('GET request failed, please try again later')
-        return NULL
+        return False
 
 # def GetMapImage(route_polyline):
 #   # TODO: use Maps Static API to generate map image from Strava route polyline
