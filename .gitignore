@@ -1,5 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# ignore pycache
 __pycache__/
+# ignore image folders
+static_maps/
+display_outputs/
 
 credentials.py
