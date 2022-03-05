@@ -8,6 +8,7 @@
 
 from operator import mod
 from PIL import Image, ImageDraw, ImageFont
+import epd4in2
 import credentials as auth
 import requests
 import urllib3
@@ -16,10 +17,12 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --Globals--
 
-epaper_params = {
+image_params = {
     'width': 300,
     'height': 400
 }
+EPD_WIDTH = 400
+EPD_HEIGHT = 300
 
 # --Functions--
 
@@ -98,7 +101,7 @@ def GetMapImage(route_polyline, map_name):
         print('error retrieving image from the server')
 
 
-def GenerateEpaperOutput(strava_activity, map_file_path):
+def GenerateOutputImage(strava_activity, map_file_path):
     # TODO: use pillow to create an image using mapbox static image and strava data
     # Reference Figma design: https://www.figma.com/file/fpX1GIlazQLY8EfvvzSyrE/Ride-Viewer-%7C-e-Paper-4.2%22?node-id=0%3A1
 
@@ -107,7 +110,7 @@ def GenerateEpaperOutput(strava_activity, map_file_path):
 
     # create new image with Pillow
     canvas = Image.new(mode='1', size=(
-        epaper_params['width'], epaper_params['height']), color=255)
+        image_params['width'], image_params['height']), color=255)
 
     # import static map image
     map_image = Image.open(map_file_path)
@@ -160,9 +163,21 @@ def GenerateEpaperOutput(strava_activity, map_file_path):
     d.text((150, 368), 'Date: {}'.format(
         activity_date), font=fnt_body, fill='#000000')
 
-    canvas.save(fp='./display_outputs/{}.bmp'.format((activity_name +
-                '_' + activity_date)), format='bmp')
-    canvas.show()
+    output_image_path = './display_outputs/{}.bmp'.format((activity_name +
+                                                           '_' + activity_date))
+
+    canvas.save(fp=output_image_path, format='bmp')
+
+    return output_image_path
+
+
+def DisplayOutputImage(output_image_path):
+    # open bmp image to be displayed on e-paper
+    dis = Image.open(output_image_path)
+    # rotate image because display is landscape by default
+    dis = dis.rotate(90, expand=True)
+    # display image
+    epd.display_frame(epd.get_frame_buffer(dis))
 
 # def DisplayError():
 #     # TODO: Generate template error image in Gimp, save to GitHub so it can be displayed
@@ -170,6 +185,10 @@ def GenerateEpaperOutput(strava_activity, map_file_path):
 
 # --Script Logic--
 
+
+# initialize e-paper
+epd = epd4in2.EPD()
+epd.init()
 
 strava_activity = GetRecentStravaData()
 
@@ -184,9 +203,8 @@ else:
     # use Mapbox to create image and save to local folder
     map_file_path = GetMapImage(strava_polyline, strava_map_id)
 
-    display_output = GenerateEpaperOutput(strava_activity, map_file_path)
+    output_image_path = GenerateOutputImage(strava_activity, map_file_path)
 
+    display_status = DisplayOutputImage(output_image_path)
 
-# TODO: MISC Operations to be deleted later
-# print(strava_data[0]["name"])
-# print(strava_data[0]["map"]["summary_polyline"])
+# TODO: Delete old maps after a while to ensure the memory never runs out
