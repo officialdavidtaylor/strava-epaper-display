@@ -160,8 +160,8 @@ def GenerateEpaperOutput(strava_activity, map_file_path):
     d.text((150, 368), 'Date: {}'.format(
         activity_date), font=fnt_body, fill='#000000')
 
-    canvas.save(fp='./display_outputs/{}'.format((activity_name +
-                '_' + activity_date)), format='png')
+    canvas.save(fp='./display_outputs/{}.bmp'.format((activity_name +
+                '_' + activity_date)), format='bmp')
     canvas.show()
 
 # def DisplayError():

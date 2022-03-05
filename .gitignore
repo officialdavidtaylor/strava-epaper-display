@@ -3,7 +3,7 @@
 # ignore pycache
 __pycache__/
 # ignore image folders
-static_maps/
-display_outputs/
+# static_maps/
+# display_outputs/
 
 credentials.py
